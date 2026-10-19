@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController; use App\Http\Controllers\ProductController; use App\Http\Controllers\DashboardController; use App\Http\Controllers\CategoryController; use App\Http\Controllers\SupplierController; use App\Http\Controllers\StockController; use App\Http\Controllers\ReportController; use App\Http\Controllers\UserController;use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
@@ -20,4 +20,14 @@ Route::post('/purchases', [PurchaseController::class, 'store'])
  Route::get('/suppliers',[SupplierController::class,'index'])->name('suppliers.index'); Route::post('/suppliers',[SupplierController::class,'store'])->name('suppliers.store'); Route::put('/suppliers/{supplier}',[SupplierController::class,'update'])->name('suppliers.update'); Route::delete('/suppliers/{supplier}',[SupplierController::class,'destroy'])->name('suppliers.destroy');
  Route::get('/stock',[StockController::class,'index'])->name('stock.index'); Route::post('/stock',[StockController::class,'store'])->name('stock.store');
  Route::get('/reports',[ReportController::class,'index'])->name('reports.index'); Route::get('/users',[UserController::class,'index'])->name('users.index'); Route::post('/users',[UserController::class,'store'])->name('users.store');
+
+    // Sales
+    Route::get('/sales', [SaleController::class, 'index'])
+        ->name('sales.index');
+
+    Route::get('/sales/create', [SaleController::class, 'create'])
+        ->name('sales.create');
+
+    Route::post('/sales', [SaleController::class, 'store'])
+        ->name('sales.store');
 });

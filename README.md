@@ -1,66 +1,182 @@
-# Inventory Management System — P5 Laravel
+# Inventory Management System — Laravel UTS
 
-Proyek P5 adalah pemindahan dan perapian Inventory Management System P4 (PHP Native) ke Laravel. Business logic yang dipertahankan mencakup produk, kategori, pemasok, pengguna dengan peran admin/staff, transaksi stok masuk/keluar, dashboard, dan laporan.
+## 1. Project Overview
 
-## Menjalankan secara lokal
-1. Buka folder proyek ini di VS Code.
-2. Untuk mempertahankan koneksi dan data P5, salin file `.env` dari proyek Laravel P5 lama ke folder ini. Jangan mengganti nilai `DB_DATABASE` jika ingin tetap menggunakan database P5 yang sama. Jika tidak memiliki `.env`, salin `.env.example` menjadi `.env` lalu atur database secara manual.
-3. Jalankan `composer install`.
-4. Jalankan `php artisan key:generate` hanya jika `APP_KEY` di `.env` masih kosong.
-5. Cadangkan database terlebih dahulu, lalu jalankan `php artisan migrate` untuk menambahkan struktur yang dibutuhkan. Perintah ini tidak menghapus tabel/data yang sudah ada.
-6. Jalankan `php artisan db:seed --class=AdminUserSeeder` jika perlu membuat akun admin demo. Seeder tidak mengubah akun yang emailnya sudah ada.
-7. Jalankan `php artisan serve --host=127.0.0.1 --port=8080`, lalu buka http://127.0.0.1:8080.
+Inventory Management System adalah aplikasi pengelolaan persediaan barang berbasis web yang dikembangkan menggunakan Laravel 12 dan MySQL/MariaDB. Proyek ini merupakan pengembangan aplikasi inventaris dengan penambahan dan penataan fitur menggunakan arsitektur Laravel.
 
-## Akun pengujian
-- Username: `admin`
-- Email: `admin@inventory.test`
-- Password: `Admin123!`
+Aplikasi membantu pengguna mengelola produk, kategori, pemasok, pembelian, penjualan, pergerakan stok, serta laporan persediaan. Struktur aplikasi menggunakan pola Model–View–Controller (MVC).
 
-Ganti kata sandi ini sebelum aplikasi digunakan bersama orang lain.
+## 2. Requirements
 
-## Menggunakan MySQL (opsional)
-Buat database baru khusus Laravel, misalnya `inventory_laravel`, lalu ubah `DB_CONNECTION=mysql`, `DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_DATABASE=inventory_laravel`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env`. Jangan arahkan aplikasi ke database P4/`inventory_app` sebelum backup dan pemetaan data selesai.
+Perangkat lunak yang diperlukan:
 
-## Catatan penting migrasi
-Migrasi Laravel mengatur struktur tabel, bukan menyalin otomatis isi database P4. Data lama tetap harus dipetakan dan diimpor secara terencana. Buat salinan cadangan file SQLite atau ekspor database MySQL sebelum migrasi. Jangan menjalankan `php artisan migrate:fresh` atau menghapus `database/database.sqlite` jika ada data yang ingin dipertahankan.
-## Arsitektur MVC
+- PHP 8.2 atau lebih baru.
+- Composer untuk mengelola dependensi PHP.
+- MySQL atau MariaDB, misalnya melalui XAMPP.
+- Web browser, seperti Google Chrome.
+- Node.js dan npm jika diperlukan untuk mengelola atau membangun aset frontend.
 
-Project ini menggunakan pola Model–View–Controller (MVC) yang disediakan Laravel.
+## 3. Installation
 
-- **Model:** merepresentasikan data dan berinteraksi dengan database, misalnya model produk dan kategori.
-- **View:** menggunakan Blade Template Engine untuk menampilkan halaman, formulir, tabel, dan pesan validasi kepada pengguna.
-- **Controller:** menerima request dari pengguna, memvalidasi input, memproses operasi aplikasi melalui model, dan mengembalikan view atau redirect.
+1. Clone repository GitHub:
 
-Alur request dimulai dari `routes/web.php`, diteruskan ke controller, kemudian controller berinteraksi dengan model jika diperlukan. Hasilnya ditampilkan melalui Blade View atau pengguna diarahkan ke halaman lain.
+   ```bash
+   git clone https://github.com/aisah250180056-prog/inventory-laravel-uts.git
+   ```
 
-## Migration dan Seeder
+2. Masuk ke folder proyek:
 
-- **Migration:** mengelola perubahan struktur tabel database secara terkontrol melalui file di `database/migrations/`.
-- **Seeder:** memasukkan data awal atau akun pengujian melalui file di `database/seeders/`.
-- **Pencadangan:** lakukan backup database sebelum menjalankan perubahan struktur. Gunakan database khusus pengujian ketika mencoba instalasi dari awal.
+   ```bash
+   cd inventory-laravel-uts
+   ```
 
-## Pengujian CRUD dan Validasi
+3. Instal dependensi Laravel:
 
-Alur pengujian penambahan produk:
+   ```bash
+   composer install
+   ```
 
-1. Pengguna membuka halaman produk dan memilih form tambah produk.
-2. Pengguna mengisi form. Input yang tidak valid harus ditolak dan pesan validasi ditampilkan.
-3. Pengguna memperbaiki input dan mengirim form kembali.
-4. Controller memvalidasi data dan menyimpannya melalui model.
-5. Aplikasi melakukan redirect setelah penyimpanan berhasil.
-6. Produk yang baru ditambahkan tampil pada halaman daftar produk.
+4. Jika file `.env` belum tersedia, buat salinannya dari `.env.example`:
 
-Pengujian juga mencakup pembaruan dan penghapusan data, kategori, supplier, transaksi stok, laporan, serta pembatasan akses berdasarkan peran pengguna.
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-## Bukti Screenshot
+5. Jika `APP_KEY` masih kosong, jalankan:
 
-Screenshot pengujian disimpan dalam folder `screenshots/`.
+   ```bash
+   php artisan key:generate
+   ```
 
-- (screenshoot/screenshots/screenshots01-route-list.png)(screenshoot/screenshots/screenshots01-route-list.png) — daftar route Laravel.
-- (screenshoot/screenshots/02-crud-produk.png) — halaman daftar dan form produk.
-- (screenshoot/screenshots/03-blade-view.png) — contoh kode Blade View.
--(screenshoot/screenshots/04c-data-tersimpan.png)
-(screenshoot/screenshots/04b-validasi.png)
-(screenshoot/screenshots/04a-form-produk.png) — bukti validasi, penyimpanan, redirect, dan data yang tampil.
+6. Pastikan konfigurasi database sudah benar sebelum menjalankan aplikasi.
 
-Nama file di atas merupakan format yang disarankan. Pastikan setiap screenshot diambil dari aplikasi dan source code proyek ini.
+7. Jalankan server lokal:
+
+   ```bash
+   php artisan serve --host=127.0.0.1 --port=8080
+   ```
+
+8. Buka aplikasi melalui browser:
+
+   http://127.0.0.1:8080
+
+## 4. Environment Setup
+
+Atur konfigurasi database di file `.env` sesuai lingkungan lokal:
+
+```dotenv
+APP_ENV=local
+APP_DEBUG=true
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=inventory_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Nilai di atas merupakan contoh konfigurasi lokal. Sesuaikan nama database, username, dan password dengan pengaturan MySQL/MariaDB yang digunakan.
+
+Pastikan layanan database aktif dan database tujuan sudah tersedia. Jangan mengganti konfigurasi `.env` yang sedang digunakan jika ingin mempertahankan koneksi ke database yang sudah ada.
+
+File `.env` berisi konfigurasi lokal dan tidak boleh diunggah ke repository GitHub.
+
+## 5. Migration & Seeding
+
+Migration digunakan untuk mengelola perubahan struktur database, sedangkan seeder digunakan untuk memasukkan data awal.
+
+Sebelum menjalankan migration pada database yang sudah berisi data:
+
+1. Buat backup database terlebih dahulu.
+2. Periksa status migration:
+
+   ```bash
+   php artisan migrate:status
+   ```
+
+3. Jalankan migration yang masih pending setelah memastikan perubahan struktur aman:
+
+   ```bash
+   php artisan migrate
+   ```
+
+Seeder yang tersedia di proyek:
+
+- `CategorySeeder` — data awal kategori.
+- `ProductSeeder` — data awal produk.
+- `AdminUserSeeder` — akun admin demo.
+
+`DatabaseSeeder` menjalankan `CategorySeeder` dan `ProductSeeder`. Untuk database pengujian baru yang memang disiapkan untuk data awal, jalankan:
+
+```bash
+php artisan db:seed
+```
+
+Untuk membuat atau memperbarui akun demo secara terpisah:
+
+```bash
+php artisan db:seed --class=AdminUserSeeder
+```
+
+**Peringatan:** seeder dapat menambah atau memperbarui data, bergantung pada implementasinya. Periksa kode seeder dan pastikan database yang digunakan sesuai sebelum menjalankannya. Jangan menjalankan `php artisan migrate:fresh` atau `php artisan db:wipe` pada database yang datanya ingin dipertahankan.
+
+Migration tidak otomatis mengimpor seluruh data dari aplikasi PHP Native sebelumnya.
+
+## 6. Demo Account
+
+Gunakan akun berikut untuk pengujian lokal jika akun demo sudah tersedia:
+
+- **Username:** `admin`
+- **Email:** `admin@inventory.test`
+- **Password:** `Admin123!`
+- **Role:** `admin`
+
+Akun tersebut didefinisikan dalam `AdminUserSeeder.php`. Jika akun belum tersedia, jalankan seeder khusus admin setelah memastikan database tujuan benar.
+
+Kredensial ini ditujukan untuk demonstrasi lokal. Ganti kata sandi sebelum aplikasi digunakan di lingkungan bersama atau produksi.
+
+## 7. Features
+
+Fitur utama aplikasi meliputi:
+
+- Login dan logout pengguna.
+- Pengaturan akses berdasarkan peran admin dan staff.
+- Pengelolaan produk: tambah, lihat, ubah, dan hapus.
+- Pengelolaan kategori dan pemasok.
+- Relasi data produk dengan kategori dan pemasok.
+- Transaksi pembelian untuk menambah stok.
+- Transaksi penjualan untuk mengurangi stok.
+- Pencatatan pergerakan stok masuk dan keluar.
+- Dashboard dan laporan inventaris.
+- Validasi input untuk membantu mencegah data tidak valid.
+- Antarmuka berbasis Blade Template Engine.
+
+Alur CRUD produk: pengguna membuka formulir, mengisi data, mengirim permintaan, lalu controller melakukan validasi dan menyimpan data melalui model. Setelah berhasil, aplikasi mengarahkan pengguna kembali ke halaman terkait untuk menampilkan data terbaru.
+
+## 8. Known Limitations
+
+- Aplikasi ditujukan untuk pengembangan dan demonstrasi lokal; konfigurasi produksi memerlukan pengamanan tambahan.
+- Aplikasi memerlukan PHP, Composer, dan layanan MySQL/MariaDB yang sesuai.
+- Migration mengelola struktur tabel, tetapi tidak otomatis memindahkan data dari aplikasi lama.
+- Hasil seeding bergantung pada implementasi masing-masing seeder dan database yang digunakan.
+- Data transaksi dan stok perlu dijaga konsistensinya ketika menguji pembelian maupun penjualan.
+- Screenshot dokumentasi harus diperbarui jika tampilan atau fitur aplikasi berubah.
+
+## Screenshots
+
+Bukti pengujian aplikasi disimpan dalam folder `screenshots/`. Gunakan screenshot terbaru yang diambil dari proyek ini.
+
+Screenshot yang disarankan:
+
+- `screenshots/01-route-list.png` — daftar route Laravel.
+- `screenshots/02-crud-produk.png` — halaman pengelolaan produk.
+- `screenshots/03-blade-view.png` — contoh kode Blade View.
+- `screenshots/04a-form-produk.png` — formulir produk.
+- `screenshots/04b-validasi.png` — contoh validasi input.
+- `screenshots/04c-data-tersimpan.png` — bukti data berhasil disimpan.
+- `screenshots/05-pembelian.png` — halaman transaksi pembelian.
+- `screenshots/06-penjualan.png` — halaman transaksi penjualan.
+- `screenshots/07-riwayat-stok.png` — riwayat pergerakan stok.
+
+Pastikan file screenshot benar-benar tersedia di folder `screenshots/` sebelum mencantumkannya sebagai bukti dokumentasi.

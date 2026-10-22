@@ -163,20 +163,26 @@ Alur CRUD produk: pengguna membuka formulir, mengisi data, mengirim permintaan, 
 - Data transaksi dan stok perlu dijaga konsistensinya ketika menguji pembelian maupun penjualan.
 - Screenshot dokumentasi harus diperbarui jika tampilan atau fitur aplikasi berubah.
 
+
 ## Screenshots
 
-Bukti pengujian aplikasi disimpan dalam folder `screenshots/`. Gunakan screenshot terbaru yang diambil dari proyek ini.
+Dokumentasi visual berikut merupakan bukti implementasi dan pengujian aplikasi Inventory Management System berbasis Laravel untuk UTS. Seluruh screenshot diambil dari proyek ini dan disimpan di folder `screenshots/`.
 
-Screenshot yang disarankan:
+### A. Tampilan dan CRUD Produk
+- `screenshots/01-dashboard-uts.png` — dashboard aplikasi.
+- `screenshots/02-crud-produk-uts.png` — halaman pengelolaan produk.
+- `screenshots/03-form-produk-uts.png` — formulir produk.
+- `screenshots/04-validasi-produk-uts.png` — bukti validasi input.
+- `screenshots/05-produk-tersimpan-uts.png` — bukti penyimpanan produk.
 
-- `screenshots/01-route-list.png` — daftar route Laravel.
-- `screenshots/02-crud-produk.png` — halaman pengelolaan produk.
-- `screenshots/03-blade-view.png` — contoh kode Blade View.
-- `screenshots/04a-form-produk.png` — formulir produk.
-- `screenshots/04b-validasi.png` — contoh validasi input.
-- `screenshots/04c-data-tersimpan.png` — bukti data berhasil disimpan.
-- `screenshots/05-pembelian.png` — halaman transaksi pembelian.
-- `screenshots/06-penjualan.png` — halaman transaksi penjualan.
-- `screenshots/07-riwayat-stok.png` — riwayat pergerakan stok.
+### B. Transaksi dan Persediaan
+- `screenshots/06-pembelian-uts.png` — halaman transaksi pembelian.
+- `screenshots/07-penjualan-uts.png` — halaman transaksi penjualan.
+- `screenshots/08-riwayat-stok-uts.png` — riwayat pergerakan stok.
+- `screenshots/09-laporan-uts.png` — halaman laporan inventaris.
 
-Pastikan file screenshot benar-benar tersedia di folder `screenshots/` sebelum mencantumkannya sebagai bukti dokumentasi.
+### C. Dokumentasi Teknis dan Pengujian
+- `screenshots/10-route-list-uts.png` — daftar route Laravel.
+- `screenshots/11-blade-view-uts.png` — contoh kode Blade View.
+- `screenshots/12-migration-uts.png` — contoh migration database.
+- `screenshots/13-hasil-pengujian-uts.png` — bukti hasil pengujian aplikasi.

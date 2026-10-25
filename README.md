@@ -333,3 +333,33 @@ Pertanyaan umum dosen saat evaluasi demo UTS dan penjelasannya:
 
 6. **Apa fungsi `lockForUpdate()` pada transaksi penjualan?**
    > Mengunci baris produk di database (*pessimistic locking*) selama blok transaksi berjalan. Ini mencegah *race condition* atau *overselling* saat dua pengguna (misalnya kasir dan customer) membeli produk yang sama pada detik yang bersamaan.
+
+
+---
+
+## 12. Dokumentasi Visual & Screenshots Hasil Pengujian (Slide 20 UTS)
+
+Seluruh tangkapan layar di bawah ini diambil langsung dari sistem yang berjalan dan tersimpan pada folder `screenshots/`:
+
+### A. Tampilan & Master Data Produk
+- `screenshots/01-dashboard-uts.png` — Dashboard ringkasan inventaris & metrik omset.
+- `screenshots/02-crud-produk-uts.png` — Tabel master data produk dengan foto sembako & status stok.
+- `screenshots/03-form-produk-uts.png` — Formulir tambah produk lengkap dengan upload foto & harga modal/jual.
+- `screenshots/04-validasi-produk-uts.png` — Bukti validasi input server-side.
+- `screenshots/05-produk-tersimpan-uts.png` — Detail produk tersimpan beserta riwayat mutasi stok.
+
+### B. Transaksi & Operasional
+- `screenshots/06-pembelian-uts.png` — Riwayat transaksi pembelian barang masuk (*Stock-In*).
+- `screenshots/07-penjualan-uts.png` — Riwayat transaksi penjualan kasir (*Stock-Out*).
+- `screenshots/08-riwayat-stok-uts.png` — Riwayat kartu mutasi stok barang (*Audit Trail*).
+- `screenshots/09-laporan-uts.png` — Halaman laporan persediaan inventaris.
+
+### C. Portal & Pemesanan Pelanggan (Customer)
+- `screenshots/14-katalog-customer-uts.png` — Tampilan katalog kartu produk dengan visual foto HD bagi Customer.
+- `screenshots/15-order-customer-uts.png` — Formulir pemesanan barang mandiri (*Self-Order*).
+
+### D. Dokumentasi Teknis & Pengujian
+- `screenshots/10-route-list-uts.png` — Daftar seluruh rute web Laravel terproteksi.
+- `screenshots/11-blade-view-uts.png` — Struktur tampilan Blade Layout & View.
+- `screenshots/12-migration-uts.png` — Skema migrasi tabel database terintegrasi.
+- `screenshots/13-hasil-pengujian-uts.png` — Bukti kelulusan seluruh skenario uji otomatis (*16 passed, 44 assertions*).

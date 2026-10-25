@@ -13,20 +13,40 @@ use Illuminate\Validation\ValidationException;
 
 class SaleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $sales = Sale::with('user')
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $q->where('sale_number', 'like', "%{$request->search}%");
+            })
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('status', $request->status);
+            })
+            ->when($request->filled('start_date'), function ($q) use ($request) {
+                $q->whereDate('sold_at', '>=', $request->start_date);
+            })
+            ->when($request->filled('end_date'), function ($q) use ($request) {
+                $q->whereDate('sold_at', '<=', $request->end_date);
+            })
             ->latest('sold_at')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return view('sales.index', compact('sales'));
     }
 
     public function create()
     {
-        $products = Product::orderBy('name')->get();
+        $products = Product::with('category')->orderBy('name')->get();
 
-        return view('sales.create', compact('products'));
+        $productsJson = $products->map(fn($p) => [
+            'id' => $p->id,
+            'name' => $p->name,
+            'stock' => $p->stock,
+            'price' => (float) ($p->selling_price ?: $p->price),
+        ])->values();
+
+        return view('sales.create', compact('products', 'productsJson'));
     }
 
     public function store(Request $request)
@@ -63,8 +83,7 @@ class SaleController extends Controller
 
                 if ($product->stock < $quantity) {
                     throw ValidationException::withMessages([
-                        'items' => "Stok {$product->name} tidak cukup. "
-                            . "Stok tersedia: {$product->stock}.",
+                        'items' => "Stok {$product->name} tidak cukup. Stok tersedia: {$product->stock}.",
                     ]);
                 }
 
@@ -88,8 +107,7 @@ class SaleController extends Controller
                     'subtotal' => $subtotal,
                 ]);
 
-                $product->stock -= $quantity;
-                $product->save();
+                $product->decrement('stock', $quantity);
 
                 StockMovement::create([
                     'product_id' => $product->id,
@@ -108,9 +126,47 @@ class SaleController extends Controller
         });
 
         return redirect()->route('sales.index')
-            ->with(
-                'success',
-                'Penjualan berhasil disimpan dan stok telah diperbarui.'
-            );
+            ->with('success', 'Penjualan berhasil disimpan dan stok telah diperbarui.');
+    }
+
+    public function show(Sale $sale)
+    {
+        $sale->load(['user', 'items.product.category']);
+
+        return view('sales.show', compact('sale'));
+    }
+
+    public function cancel(Request $request, Sale $sale)
+    {
+        abort_unless($request->user()->isAdmin(), 403, 'Hanya Admin yang dapat membatalkan transaksi.');
+
+        if ($sale->status === 'cancelled') {
+            return back()->withErrors(['error' => 'Transaksi penjualan ini sudah berstatus batal.']);
+        }
+
+        DB::transaction(function () use ($request, $sale) {
+            $sale->load('items.product');
+
+            foreach ($sale->items as $item) {
+                $product = Product::whereKey($item->product_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $product->increment('stock', $item->quantity);
+
+                StockMovement::create([
+                    'product_id' => $product->id,
+                    'user_id' => $request->user()->id,
+                    'type' => 'IN',
+                    'quantity' => $item->quantity,
+                    'note' => 'Pembatalan Penjualan ' . $sale->sale_number,
+                ]);
+            }
+
+            $sale->update(['status' => 'cancelled']);
+        });
+
+        return redirect()->route('sales.show', $sale->id)
+            ->with('success', 'Transaksi penjualan berhasil dibatalkan dan stok telah dipulihkan.');
     }
 }

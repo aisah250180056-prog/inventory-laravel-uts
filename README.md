@@ -1,72 +1,71 @@
-# Inventory Management System — Laravel UTS
+# Inventory & Sales Management System — Laravel UTS
+
+Aplikasi web manajemen persediaan barang dan transaksi penjualan terintegrasi yang dibangun menggunakan **Laravel 12**, **MySQL/MariaDB**, **Eloquent ORM**, autentikasi berbasis peran (**Role-Based Access Control** dengan 3 Role: **Admin**, **Staff**, dan **Customer**), proteksi transaksi database atomik, dan validasi sisi server.
+
+Proyek ini dikembangkan untuk memenuhi kriteria evaluasi **Ujian Tengah Semester (UTS) Web Programming 2**.
+
+---
 
 ## 1. Project Overview
 
-Inventory Management System adalah aplikasi pengelolaan persediaan barang berbasis web yang dikembangkan menggunakan Laravel 12 dan MySQL/MariaDB. Proyek ini merupakan pengembangan aplikasi inventaris dengan penambahan dan penataan fitur menggunakan arsitektur Laravel.
+Aplikasi ini mengintegrasikan operasional internal bisnis distribusi dan layanan pemesanan mandiri oleh pelanggan:
+- **Konsistensi Stok**: Stok otomatis bertambah saat pembelian dari pemasok (*stock-in*) dan berkurang saat transaksi penjualan di kasir atau pesanan pelanggan (*stock-out*).
+- **Pencegahan Overselling**: Pesanan maupun penjualan langsung ditolak jika kuantitas melebihi stok yang tersedia.
+- **Atomic Database Transactions**: Menggunakan `DB::transaction()` dan `lockForUpdate()` agar tidak ada transaksi atau perubahan stok yang setengah tersimpan jika terjadi error.
+- **Otorisasi 3 Peran (Role-Based Access Control)**:
+  1. **Admin / Owner**: Kontrol penuh master data, kelola user, laporan finansial, dan pembatalan transaksi.
+  2. **Staff / Kasir**: Input pembelian barang masuk, input penjualan kasir, melihat daftar produk.
+  3. **Customer / Pelanggan**: Registrasi akun mandiri, melihat katalog produk tersedia, membuat pesanan belanja online, dan melihat riwayat nota pesanan sendiri.
 
-Aplikasi membantu pengguna mengelola produk, kategori, pemasok, pembelian, penjualan, pergerakan stok, serta laporan persediaan. Struktur aplikasi menggunakan pola Model–View–Controller (MVC).
+---
 
 ## 2. Requirements
 
-Perangkat lunak yang diperlukan:
+- **PHP**: Versi 8.2 atau lebih baru.
+- **Composer**: Dependency manager PHP.
+- **Database**: MySQL / MariaDB (misalnya via XAMPP).
+- **Web Server**: Apache / PHP Built-in server (`php artisan serve`).
+- **Web Browser**: Chrome, Edge, atau Firefox.
 
-- PHP 8.2 atau lebih baru.
-- Composer untuk mengelola dependensi PHP.
-- MySQL atau MariaDB, misalnya melalui XAMPP.
-- Web browser, seperti Google Chrome.
-- Node.js dan npm jika diperlukan untuk mengelola atau membangun aset frontend.
+---
 
 ## 3. Installation
 
-1. Clone repository GitHub:
+Ikuti langkah-langkah instalasi bersih (*clean setup*) berikut:
 
+1. **Clone repository:**
    ```bash
    git clone https://github.com/aisah250180056-prog/inventory-laravel-uts.git
-   ```
-
-2. Masuk ke folder proyek:
-
-   ```bash
    cd inventory-laravel-uts
    ```
 
-3. Instal dependensi Laravel:
-
+2. **Instal dependensi Composer:**
    ```bash
    composer install
    ```
 
-4. Jika file `.env` belum tersedia, buat salinannya dari `.env.example`:
-
+3. **Salin file environment:**
    ```powershell
-   Copy-Item .env.example .env
+   copy .env.example .env
    ```
 
-5. Jika `APP_KEY` masih kosong, jalankan:
-
+4. **Generate application key:**
    ```bash
    php artisan key:generate
    ```
 
-6. Pastikan konfigurasi database sudah benar sebelum menjalankan aplikasi.
-
-7. Jalankan server lokal:
-
-   ```bash
-   php artisan serve --host=127.0.0.1 --port=8080
-   ```
-
-8. Buka aplikasi melalui browser:
-
-   http://127.0.0.1:8080
+---
 
 ## 4. Environment Setup
 
-Atur konfigurasi database di file `.env` sesuai lingkungan lokal:
+Buka file `.env` dan sesuaikan konfigurasi database lokal Anda (misalnya default XAMPP MySQL):
 
 ```dotenv
+APP_NAME=Laravel
 APP_ENV=local
+APP_KEY=base64:...
 APP_DEBUG=true
+APP_URL=http://localhost:8080
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -76,113 +75,261 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Nilai di atas merupakan contoh konfigurasi lokal. Sesuaikan nama database, username, dan password dengan pengaturan MySQL/MariaDB yang digunakan.
+> **Catatan:** Pastikan database `inventory_db` sudah dibuat di MySQL (`CREATE DATABASE inventory_db;`) sebelum menjalankan migrasi.
 
-Pastikan layanan database aktif dan database tujuan sudah tersedia. Jangan mengganti konfigurasi `.env` yang sedang digunakan jika ingin mempertahankan koneksi ke database yang sudah ada.
-
-File `.env` berisi konfigurasi lokal dan tidak boleh diunggah ke repository GitHub.
+---
 
 ## 5. Migration & Seeding
 
-Migration digunakan untuk mengelola perubahan struktur database, sedangkan seeder digunakan untuk memasukkan data awal.
-
-Sebelum menjalankan migration pada database yang sudah berisi data:
-
-1. Buat backup database terlebih dahulu.
-2. Periksa status migration:
-
-   ```bash
-   php artisan migrate:status
-   ```
-
-3. Jalankan migration yang masih pending setelah memastikan perubahan struktur aman:
-
-   ```bash
-   php artisan migrate
-   ```
-
-Seeder yang tersedia di proyek:
-
-- `CategorySeeder` — data awal kategori.
-- `ProductSeeder` — data awal produk.
-- `AdminUserSeeder` — akun admin demo.
-
-`DatabaseSeeder` menjalankan `CategorySeeder` dan `ProductSeeder`. Untuk database pengujian baru yang memang disiapkan untuk data awal, jalankan:
+Jalankan migrasi untuk membuat seluruh tabel secara otomatis beserta seed data pengujian awal:
 
 ```bash
-php artisan db:seed
+php artisan migrate --seed
 ```
 
-Untuk membuat atau memperbarui akun demo secara terpisah:
+Seeder akan otomatis mengisi:
+1. Akun Demo Administrator (`admin@inventory.test`)
+2. Akun Demo Staf Kasir (`staff@inventory.test`)
+3. Akun Demo Customer Pelanggan (`customer@inventory.test`)
+4. Data Master Kategori Barang
+5. Data Master Pemasok (Supplier)
+6. Data Master Produk lengkap dengan SKU, harga beli, harga jual, stok awal, dan stok minimum.
+
+---
+
+## 6. Akun Demo & Matriks Hak Akses (3 Peran)
+
+| Peran (Role) | Username / Email | Password | Hak Akses Utama |
+|---|---|---|---|
+| **Admin / Owner** | `admin` / `admin@inventory.test` | `Admin123!` | Akses penuh: CRUD Master Data, Kelola Pengguna, Batalkan Transaksi & Pulihkan Stok, Dashboard Agregat, Laporan |
+| **Staff / Kasir** | `staff` / `staff@inventory.test` | `Staff123!` | Operasional: Input Transaksi Pembelian (Stock-In), Input Penjualan Kasir (Stock-Out), Melihat Produk |
+| **Customer** | `customer` / `customer@inventory.test` | `Customer123!` | Portal Pelanggan: Registrasi mandiri (`/register`), Katalog Produk Tersedia, Belanja/Pesan Barang, Lihat Riwayat Nota Sendiri |
+
+> Pengunjung baru juga dapat mendaftar langsung sebagai **Customer** melalui tautan **[Daftar di sini](http://127.0.0.1:8080/register)** pada halaman Login.
+
+---
+
+## 7. Menjalankan Aplikasi
+
+Jalankan server pengembangan Laravel:
 
 ```bash
-php artisan db:seed --class=AdminUserSeeder
+php artisan serve --host=127.0.0.1 --port=8080
 ```
 
-**Peringatan:** seeder dapat menambah atau memperbarui data, bergantung pada implementasinya. Periksa kode seeder dan pastikan database yang digunakan sesuai sebelum menjalankannya. Jangan menjalankan `php artisan migrate:fresh` atau `php artisan db:wipe` pada database yang datanya ingin dipertahankan.
+Buka peramban dan akses:
+👉 **http://127.0.0.1:8080**
 
-Migration tidak otomatis mengimpor seluruh data dari aplikasi PHP Native sebelumnya.
+---
 
-## 6. Demo Account
+## 8. Entity Relationship Diagram (ERD) & Struktur Data
 
-Gunakan akun berikut untuk pengujian lokal jika akun demo sudah tersedia:
+Diagram ERD lengkap dengan atribut, tipe data, serta kardinalitas relasi antar entitas:
 
-- **Username:** `admin`
-- **Email:** `admin@inventory.test`
-- **Password:** `Admin123!`
-- **Role:** `admin`
+```mermaid
+erDiagram
+    USERS ||--o{ PURCHASES : "mencatat (admin/staff)"
+    USERS ||--o{ SALES : "membuat (kasir/customer)"
+    USERS ||--o{ STOCK_MOVEMENTS : "melakukan mutasi"
 
-Akun tersebut didefinisikan dalam `AdminUserSeeder.php`. Jika akun belum tersedia, jalankan seeder khusus admin setelah memastikan database tujuan benar.
+    CATEGORIES ||--o{ PRODUCTS : "mengelompokkan"
+    SUPPLIERS ||--o{ PRODUCTS : "memasok produk"
+    SUPPLIERS ||--o{ PURCHASES : "menerima pesanan"
 
-Kredensial ini ditujukan untuk demonstrasi lokal. Ganti kata sandi sebelum aplikasi digunakan di lingkungan bersama atau produksi.
+    PURCHASES ||--o{ PURCHASE_ITEMS : "memiliki rincian"
+    PRODUCTS ||--o{ PURCHASE_ITEMS : "dipesan dalam"
 
-## 7. Features
+    SALES ||--o{ SALE_ITEMS : "memiliki rincian"
+    PRODUCTS ||--o{ SALE_ITEMS : "terjual dalam"
 
-Fitur utama aplikasi meliputi:
+    PRODUCTS ||--o{ STOCK_MOVEMENTS : "memiliki jejak mutasi"
 
-- Login dan logout pengguna.
-- Pengaturan akses berdasarkan peran admin dan staff.
-- Pengelolaan produk: tambah, lihat, ubah, dan hapus.
-- Pengelolaan kategori dan pemasok.
-- Relasi data produk dengan kategori dan pemasok.
-- Transaksi pembelian untuk menambah stok.
-- Transaksi penjualan untuk mengurangi stok.
-- Pencatatan pergerakan stok masuk dan keluar.
-- Dashboard dan laporan inventaris.
-- Validasi input untuk membantu mencegah data tidak valid.
-- Antarmuka berbasis Blade Template Engine.
+    USERS {
+        bigint id PK
+        string name
+        string username UK
+        string email UK
+        string password
+        string role "admin | staff | customer"
+        timestamp created_at
+        timestamp updated_at
+    }
 
-Alur CRUD produk: pengguna membuka formulir, mengisi data, mengirim permintaan, lalu controller melakukan validasi dan menyimpan data melalui model. Setelah berhasil, aplikasi mengarahkan pengguna kembali ke halaman terkait untuk menampilkan data terbaru.
+    CATEGORIES {
+        bigint id PK
+        string name UK
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
 
-## 8. Known Limitations
+    SUPPLIERS {
+        bigint id PK
+        string name
+        string phone
+        string email
+        text address
+        timestamp created_at
+        timestamp updated_at
+    }
 
-- Aplikasi ditujukan untuk pengembangan dan demonstrasi lokal; konfigurasi produksi memerlukan pengamanan tambahan.
-- Aplikasi memerlukan PHP, Composer, dan layanan MySQL/MariaDB yang sesuai.
-- Migration mengelola struktur tabel, tetapi tidak otomatis memindahkan data dari aplikasi lama.
-- Hasil seeding bergantung pada implementasi masing-masing seeder dan database yang digunakan.
-- Data transaksi dan stok perlu dijaga konsistensinya ketika menguji pembelian maupun penjualan.
-- Screenshot dokumentasi harus diperbarui jika tampilan atau fitur aplikasi berubah.
+    PRODUCTS {
+        bigint id PK
+        bigint category_id FK
+        bigint supplier_id FK
+        string sku UK
+        string name
+        string image "Path foto produk"
+        decimal purchase_price "Harga beli satuan"
+        decimal selling_price "Harga jual satuan"
+        decimal price "Harga kompatibilitas"
+        int stock "Sisa stok fisik"
+        int minimum_stock "Batas minimum restock"
+        timestamp created_at
+        timestamp updated_at
+    }
 
+    PURCHASES {
+        bigint id PK
+        bigint supplier_id FK
+        bigint user_id FK
+        string purchase_number UK
+        decimal total "Total belanja masuk"
+        string status "completed | cancelled"
+        timestamp purchased_at
+        timestamp created_at
+        timestamp updated_at
+    }
 
-## Screenshots
+    PURCHASE_ITEMS {
+        bigint id PK
+        bigint purchase_id FK
+        bigint product_id FK
+        int quantity "Jumlah barang masuk"
+        decimal unit_cost "Harga beli saat transaksi"
+        decimal subtotal "qty * unit_cost"
+        timestamp created_at
+        timestamp updated_at
+    }
 
-Dokumentasi visual berikut merupakan bukti implementasi dan pengujian aplikasi Inventory Management System berbasis Laravel untuk UTS. Seluruh screenshot diambil dari proyek ini dan disimpan di folder `screenshots/`.
+    SALES {
+        bigint id PK
+        bigint user_id FK "Kasir atau Customer"
+        string sale_number UK
+        decimal total "Total nilai transaksi"
+        string status "completed | cancelled"
+        timestamp sold_at
+        timestamp created_at
+        timestamp updated_at
+    }
 
-### A. Tampilan dan CRUD Produk
-- `screenshots/01-dashboard-uts.png` — dashboard aplikasi.
-- `screenshots/02-crud-produk-uts.png` — halaman pengelolaan produk.
-- `screenshots/03-form-produk-uts.png` — formulir produk.
-- `screenshots/04-validasi-produk-uts.png` — bukti validasi input.
-- `screenshots/05-produk-tersimpan-uts.png` — bukti penyimpanan produk.
+    SALE_ITEMS {
+        bigint id PK
+        bigint sale_id FK
+        bigint product_id FK
+        int quantity "Jumlah barang keluar"
+        decimal unit_price "Harga jual saat transaksi"
+        decimal subtotal "qty * unit_price"
+        timestamp created_at
+        timestamp updated_at
+    }
 
-### B. Transaksi dan Persediaan
-- `screenshots/06-pembelian-uts.png` — halaman transaksi pembelian.
-- `screenshots/07-penjualan-uts.png` — halaman transaksi penjualan.
-- `screenshots/08-riwayat-stok-uts.png` — riwayat pergerakan stok.
-- `screenshots/09-laporan-uts.png` — halaman laporan inventaris.
+    STOCK_MOVEMENTS {
+        bigint id PK
+        bigint product_id FK
+        bigint user_id FK
+        string type "IN | OUT"
+        int quantity
+        string note "Keterangan mutasi"
+        timestamp created_at
+        timestamp updated_at
+    }
+```
 
-### C. Dokumentasi Teknis dan Pengujian
-- `screenshots/10-route-list-uts.png` — daftar route Laravel.
-- `screenshots/11-blade-view-uts.png` — contoh kode Blade View.
-- `screenshots/12-migration-uts.png` — contoh migration database.
-- `screenshots/13-hasil-pengujian-uts.png` — bukti hasil pengujian aplikasi.
+### Penjelasan Relasi Eloquent (Slide 10 UTS):
+- `Category hasMany Products` / `Product belongsTo Category`
+- `Supplier hasMany Purchases` / `Purchase belongsTo Supplier`
+- `Purchase hasMany PurchaseItems` / `PurchaseItem belongsTo Purchase`
+- `PurchaseItem belongsTo Product` / `Product hasMany PurchaseItems`
+- `User hasMany Sales` / `Sale belongsTo User`
+- `Sale hasMany SaleItems` / `SaleItem belongsTo Sale`
+- `SaleItem belongsTo Product` / `Product hasMany SaleItems`
+- `Product hasMany StockMovements` / `StockMovement belongsTo Product`
+
+> Dokumentasi detail kamus data dan penjelasan kardinalitas lengkap tersedia pada dokumen: **[`docs/ERD.md`](docs/ERD.md)**.
+
+---
+
+## 9. Fitur Aplikasi Sesuai Ketentuan PPT UTS
+
+1. **Autentikasi & Multi-Role (3 Role)**:
+   - Login menggunakan username atau email.
+   - Pendaftaran akun Customer mandiri (`/register`).
+   - Pembatasan rute server-side via Middleware & Gates (`can:admin`, `can:backoffice`).
+   - Customer otomatis diarahkan ke antarmuka katalog dan dilarang mengakses menu internal toko (HTTP 403).
+2. **Master Data**:
+   - Kategori & Pemasok (CRUD terproteksi).
+   - Produk: SKU unik, nama, kategori, pemasok, harga beli (*purchase_price*), harga jual (*selling_price*), stok, dan batas minimum stok (*minimum_stock*).
+   - Larangan *hard-delete* jika produk memiliki riwayat transaksi (pembelian, penjualan, mutasi stok).
+3. **Transaksi Pembelian (Stock-In)**:
+   - Form dinamis multi-item.
+   - Stok otomatis bertambah saat pembelian tersimpan.
+   - Nomor transaksi unik otomatis (`PO-YYYYMMDDHHIISS-XXXX`).
+   - Fitur pembatalan oleh Admin (menarik kembali stok jika mencukupi).
+4. **Transaksi Penjualan (Stock-Out)**:
+   - Form dinamis multi-item di kasir maupun di portal customer.
+   - **Harga diambil dan divalidasi dari database**, bukan dari input browser.
+   - Pengecekan stok aman dengan `Product::lockForUpdate()`.
+   - Transaksi ditolak jika kuantitas melebihi stok yang tersedia.
+   - Fitur pembatalan oleh Admin (mengembalikan stok ke gudang secara otomatis).
+5. **Dashboard & Laporan**:
+   - Total produk master dan total transaksi kumulatif.
+   - Omset penjualan hari ini, bulan ini, dan total penjualan selesai.
+   - Deteksi produk stok kritis (`stock <= minimum_stock`) dengan indikator peringatan restock.
+   - Pencarian, filter tanggal transaksi, filter status (selesai/batal), dan pagination (`withQueryString()`).
+
+---
+
+## 10. Pengujian Otomatis (Automated Tests)
+
+Semua skenario pengujian wajib telah diimplementasikan dalam test suite PHPUnit:
+- Auth (Guest redirection & invalid login rejection)
+- Validasi SKU unik dan harga negatif
+- Pembelian berhasil menambah stok
+- Penjualan kasir berhasil mengurangi stok
+- Penjualan ditolak jika stok tidak mencukupi (tanpa perubahan data)
+- Transaksi atomik (*rollback* jika satu item dalam multi-item gagal)
+- Otorisasi server-side (Staff diblokir dari aksi Admin)
+- Proteksi Customer (Customer diblokir dari modul internal toko)
+- Pemesanan Customer mandiri berhasil mengurangi stok
+- Registrasi Customer mandiri berhasil
+- Pencarian dan filter kategori
+
+Jalankan test suite menggunakan perintah:
+```bash
+php artisan test
+```
+
+---
+
+## 11. Panduan Wawancara Pemilik Kode (Code Ownership Q&A)
+
+Pertanyaan umum dosen saat evaluasi demo UTS dan penjelasannya:
+
+1. **Mengapa `Sale` memiliki relasi `hasMany` ke `SaleItem`?**
+   > Karena satu transaksi penjualan dapat berisi lebih dari satu jenis barang (*multi-item*). Tabel `sales` menyimpan header umum (nomor nota, tanggal, total, kasir/customer), sedangkan `sale_items` menyimpan detail per produk, kuantitas, dan harga saat transaksi terjadi.
+
+2. **Di mana sistem memastikan stok tidak menjadi negatif?**
+   > Di `SaleController.php` dan `CustomerController.php` di dalam `DB::transaction()`. Sebelum mengurangi stok, sistem melakukan `Product::lockForUpdate()->findOrFail(...)` dan memverifikasi `$product->stock < $quantity`. Jika tidak cukup, sistem melempar `ValidationException` sehingga transaksi dibatalkan sebelum stok tersentuh.
+
+3. **Mengapa total penjualan dihitung di server?**
+   > Untuk mencegah eksploitasi manipulasi input (*client tampering*). Jika total atau harga dihitung di browser, pihak tidak bertanggung jawab bisa mengubah nilai HTML / Request Payload untuk membeli barang berharga tinggi dengan harga murah. Server selalu mengambil harga asli dari database.
+
+4. **Apa risiko jika pengurangan stok dilakukan di luar `DB::transaction`?**
+   > Terjadi *data inconsistency* (data setengah tersimpan). Jika header nota penjualan berhasil disimpan tetapi penyimpanan item gagal atau terjadi error di tengah jalan, stok sudah terlanjur berkurang atau nota tercatat tanpa item barang.
+
+5. **Bagaimana mencegah Staff atau Customer mengakses fungsi Admin melalui URL langsung?**
+   > Menggunakan otorisasi server-side di rute (`routes/web.php`) melalui middleware `can:admin` dan `can:backoffice` serta pengecekan `abort_unless(...)` pada level Controller. Menyembunyikan tombol di Blade view hanya untuk antarmuka pengguna, bukan perlindungan keamanan.
+
+6. **Apa fungsi `lockForUpdate()` pada transaksi penjualan?**
+   > Mengunci baris produk di database (*pessimistic locking*) selama blok transaksi berjalan. Ini mencegah *race condition* atau *overselling* saat dua pengguna (misalnya kasir dan customer) membeli produk yang sama pada detik yang bersamaan.

@@ -261,6 +261,38 @@ class InventoryTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_staff_cannot_create_or_edit_product(): void
+    {
+        $product = Product::create([
+            'sku' => 'SKU-STAFF-LOCK',
+            'name' => 'Produk Kunci',
+            'category_id' => $this->category->id,
+            'selling_price' => 15000,
+            'stock' => 10,
+            'minimum_stock' => 2,
+        ]);
+
+        // Staff tidak boleh buka form create
+        $responseCreate = $this->actingAs($this->staff)->get('/products/create');
+        $responseCreate->assertStatus(403);
+
+        // Staff tidak boleh post tambah produk
+        $responseStore = $this->actingAs($this->staff)->post('/products', [
+            'sku' => 'SKU-ILLEGAL',
+            'name' => 'Ilegal',
+            'category_id' => $this->category->id,
+            'purchase_price' => 1000,
+            'selling_price' => 2000,
+            'stock' => 5,
+            'minimum_stock' => 1,
+        ]);
+        $responseStore->assertStatus(403);
+
+        // Staff tidak boleh buka form edit
+        $responseEdit = $this->actingAs($this->staff)->get("/products/{$product->id}/edit");
+        $responseEdit->assertStatus(403);
+    }
+
     public function test_staff_cannot_delete_product(): void
     {
         $product = Product::create([

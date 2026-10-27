@@ -6,7 +6,9 @@
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1>Master Data Produk</h1>
-        <a href="{{ route('products.create') }}" class="btn">+ Tambah Produk</a>
+        @if(auth()->user()->isAdmin())
+            <a href="{{ route('products.create') }}" class="btn">+ Tambah Produk</a>
+        @endif
     </div>
 
     <!-- Form Pencarian dan Filter -->
@@ -103,10 +105,10 @@
                         <td>
                             <div style="display: flex; gap: 6px; align-items: center;">
                                 <a href="{{ route('products.show', $product->id) }}" style="font-weight: 500;">Detail</a>
-                                <span>|</span>
-                                <a href="{{ route('products.edit', $product->id) }}" style="font-weight: 500;">Edit</a>
 
                                 @if(auth()->user()->isAdmin())
+                                    <span>|</span>
+                                    <a href="{{ route('products.edit', $product->id) }}" style="font-weight: 500;">Edit</a>
                                     <span>|</span>
                                     <form
                                         action="{{ route('products.destroy', $product->id) }}"

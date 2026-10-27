@@ -39,8 +39,10 @@ class ProductController extends Controller
         return view('products.index', compact('products', 'categories', 'sort', 'direction'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        abort_unless($request->user()->isAdmin(), 403, 'Hanya Admin yang dapat menambah produk.');
+
         $categories = Category::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
 
@@ -49,6 +51,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless($request->user()->isAdmin(), 403, 'Hanya Admin yang dapat menambah produk.');
+
         $data = $request->validate([
             'sku' => ['required', 'string', 'max:50', 'unique:products,sku'],
             'name' => ['required', 'string', 'max:150'],
@@ -84,8 +88,10 @@ class ProductController extends Controller
         return view('products.show', compact('product'));
     }
 
-    public function edit(Product $product)
+    public function edit(Request $request, Product $product)
     {
+        abort_unless($request->user()->isAdmin(), 403, 'Hanya Admin yang dapat mengedit produk.');
+
         $categories = Category::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
 
@@ -94,6 +100,8 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        abort_unless($request->user()->isAdmin(), 403, 'Hanya Admin yang dapat mengedit produk.');
+
         $data = $request->validate([
             'sku' => ['required', 'string', 'max:50', 'unique:products,sku,' . $product->id],
             'name' => ['required', 'string', 'max:150'],
